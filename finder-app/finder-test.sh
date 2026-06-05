@@ -37,8 +37,6 @@ rm -rf "${WRITEDIR}"
 mkdir -p "${WRITEDIR}"
 
 # Clean and build writer C application
-make -C "${REPO_ROOT}/finder-app" clean
-make -C "${REPO_ROOT}/finder-app"
 
 i=1
 while [ $i -le "$NUMFILES" ]
