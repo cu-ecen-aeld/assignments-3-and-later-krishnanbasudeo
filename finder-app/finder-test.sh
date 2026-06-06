@@ -1,6 +1,4 @@
 #!/bin/sh
-# Tester script for assignment 1 and assignment 2
-# Author: Siddhant Jajoo
 
 set -e
 set -u
@@ -10,52 +8,54 @@ WRITESTR=AELD_IS_FUN
 WRITEDIR=/tmp/aeld-data
 
 SCRIPT_DIR=$(dirname "$0")
-REPO_ROOT=$(cd "${SCRIPT_DIR}/.." && pwd)
+SCRIPT_DIR=$(cd "$SCRIPT_DIR" && pwd)
 
-username=$(cat "${REPO_ROOT}/conf/username.txt")
-
-if [ $# -lt 3 ]
-then
-        echo "Using default value ${WRITESTR} for string to write"
-        if [ $# -lt 1 ]
-        then
-                echo "Using default value ${NUMFILES} for number of files to write"
-        else
-                NUMFILES=$1
-        fi
+if [ -f "$SCRIPT_DIR/conf/username.txt" ]; then
+    username=$(cat "$SCRIPT_DIR/conf/username.txt")
+elif [ -f "$SCRIPT_DIR/../conf/username.txt" ]; then
+    username=$(cat "$SCRIPT_DIR/../conf/username.txt")
 else
-        NUMFILES=$1
-        WRITESTR=$2
-        WRITEDIR=/tmp/aeld-data/$3
+    echo "Error: username.txt not found"
+    exit 1
 fi
 
-MATCHSTR="The number of files are ${NUMFILES} and the number of matching lines are ${NUMFILES}"
+if [ $# -lt 3 ]; then
+    echo "Using default value $WRITESTR for string to write"
+    if [ $# -lt 1 ]; then
+        echo "Using default value $NUMFILES for number of files to write"
+    else
+        NUMFILES=$1
+    fi
+else
+    NUMFILES=$1
+    WRITESTR=$2
+    WRITEDIR=/tmp/aeld-data/$3
+fi
 
-echo "Writing ${NUMFILES} files containing string ${WRITESTR} to ${WRITEDIR}"
+MATCHSTR="The number of files are $NUMFILES and the number of matching lines are $NUMFILES"
 
-rm -rf "${WRITEDIR}"
-mkdir -p "${WRITEDIR}"
+echo "Writing $NUMFILES files containing string $WRITESTR to $WRITEDIR"
 
-# Clean and build writer C application
+rm -rf "$WRITEDIR"
+mkdir -p "$WRITEDIR"
 
 i=1
-while [ $i -le "$NUMFILES" ]
+while [ "$i" -le "$NUMFILES" ]
 do
-        "${REPO_ROOT}/finder-app/writer" "${WRITEDIR}/${username}${i}.txt" "${WRITESTR}"
-        i=$((i + 1))
+    "$SCRIPT_DIR/writer" "$WRITEDIR/${username}${i}.txt" "$WRITESTR"
+    i=$((i + 1))
 done
 
-OUTPUTSTRING=$("${REPO_ROOT}/finder-app/finder.sh" "${WRITEDIR}" "${WRITESTR}")
+OUTPUTSTRING=$("$SCRIPT_DIR/finder.sh" "$WRITEDIR" "$WRITESTR")
 
-echo "${OUTPUTSTRING}"
+echo "$OUTPUTSTRING"
 
-if [ "${OUTPUTSTRING}" = "${MATCHSTR}" ]
-then
-        echo "success"
-        exit 0
+if [ "$OUTPUTSTRING" = "$MATCHSTR" ]; then
+    echo "success"
+    exit 0
 else
-        echo "error"
-        echo "Expected: ${MATCHSTR}"
-        echo "Actual: ${OUTPUTSTRING}"
-        exit 1
+    echo "error"
+    echo "Expected: $MATCHSTR"
+    echo "Actual: $OUTPUTSTRING"
+    exit 1
 fi
