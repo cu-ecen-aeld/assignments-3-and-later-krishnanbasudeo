@@ -6,14 +6,14 @@ set -u
 NUMFILES=10
 WRITESTR=AELD_IS_FUN
 WRITEDIR=/tmp/aeld-data
+CONFIG_DIR=/etc/finder-app/conf
 
-SCRIPT_DIR=$(dirname "$0")
-SCRIPT_DIR=$(cd "$SCRIPT_DIR" && pwd)
-
-if [ -f "$SCRIPT_DIR/conf/username.txt" ]; then
-    username=$(cat "$SCRIPT_DIR/conf/username.txt")
-elif [ -f "$SCRIPT_DIR/../conf/username.txt" ]; then
-    username=$(cat "$SCRIPT_DIR/../conf/username.txt")
+if [ -f "$CONFIG_DIR/username.txt" ]; then
+    username=$(cat "$CONFIG_DIR/username.txt")
+elif [ -f "./conf/username.txt" ]; then
+    username=$(cat "./conf/username.txt")
+elif [ -f "../conf/username.txt" ]; then
+    username=$(cat "../conf/username.txt")
 else
     echo "Error: username.txt not found"
     exit 1
@@ -42,13 +42,14 @@ mkdir -p "$WRITEDIR"
 i=1
 while [ "$i" -le "$NUMFILES" ]
 do
-    "$SCRIPT_DIR/writer" "$WRITEDIR/${username}${i}.txt" "$WRITESTR"
+    writer "$WRITEDIR/${username}${i}.txt" "$WRITESTR"
     i=$((i + 1))
 done
 
-OUTPUTSTRING=$("$SCRIPT_DIR/finder.sh" "$WRITEDIR" "$WRITESTR")
+OUTPUTSTRING=$(finder.sh "$WRITEDIR" "$WRITESTR")
 
 echo "$OUTPUTSTRING"
+echo "$OUTPUTSTRING" > /tmp/assignment4-result.txt
 
 if [ "$OUTPUTSTRING" = "$MATCHSTR" ]; then
     echo "success"
